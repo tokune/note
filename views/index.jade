@@ -1,0 +1,91 @@
+extends layout
+
+block body
+  .box(ng-view) 
+
+block script
+  script(src='/js/main.js')
+  script.
+    var app = angular.module('TNote', ['ngRoute']);
+    
+    app.controller('NoteController', function ($scope, $routeParams, noteService) {
+      var note_id = ($routeParams.noteID) ? parseInt($routeParams.noteID) : 0;
+      var note = {title:'', content:''};
+      var tempHTML = '';
+      var note_el = $('.note')[0];
+      var Title = function() {
+        this.value = note.title;
+      };
+      Title.prototype = {  
+        get value() {  
+          return this._value;  
+        },
+        set value(val) {  
+          noteService.setTitle(val);
+          this._value = val;  
+        }
+      };
+      $scope.current_title = new Title();
+      if(note_id) {
+        noteService.getNote(note_id).then(
+          function(data) {
+            note = data;
+            document.note = note.content;
+            $scope.current_title = new Title();
+            note_el.innerHTML = note.content;
+          }
+        );
+      }
+      $scope.submit = function(){
+        noteService.saveNote(note_id, $scope.current_title.value);
+      };
+    });
+    app.config(function($routeProvider) {
+      $routeProvider
+        .when('/', {   
+          templateUrl: '/about'
+        })  
+        .when('/note/:noteID', {   
+          controller: 'NoteController',
+          templateUrl: '/note'
+        })  
+        .otherwise({ redirectTo: '/' })
+    });
+    app.service('noteService', function ($http, $q) {
+      var title = '';
+      this.setTitle = function(val){
+        title = val;
+        var target = $('li[current|=\'true\']');
+        if (target && target[0]) target[0].innerText = title;
+        return title;
+      };
+      this.getTitle = function(){
+        return title;
+      };
+      this.saveNote = function(note_id, title){
+        var content = $('.note') && $('.note').length > 0 ? $('.note')[0].innerHTML : '';
+        var url = '/note/';
+        url = note_id ? url + note_id : url;
+        $http.post(url, {title: title, content: content})
+          .success(function(data){
+            if(data.err) return alert('error');
+            alert('saved');
+          })
+          .error(function(){
+            alert('error');
+          });
+      };
+      this.getNote = function(note_id){
+        var deferred = $q.defer();
+        var url = '/note/' + note_id;
+        $http.get(url)
+          .success(function(data){
+            if(data.err) deferred.reject();
+            else deferred.resolve(data);
+          })
+          .error(function(){
+            deferred.reject(); 
+          });
+        return deferred.promise;
+      };
+    });
