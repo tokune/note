@@ -59,6 +59,8 @@ $(function() {
         var a_element = document.createElement('a');
         a_element.setAttribute('href', '#/note/0');
         li_element.setAttribute('current', 'true');
+        li_element.setAttribute('draggable', 'true');
+        li_element.setAttribute('data-id', '0');
         a_element.appendChild(li_element);
         $('.add-note').after(a_element);
         paintBG(); 
@@ -73,4 +75,5 @@ $(function() {
         targets.removeAttr('current');
     }
     paintBG(); 
+
 });

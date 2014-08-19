@@ -13,16 +13,22 @@ html(ng-app="TNote")
     link(rel="stylesheet", href="/css/main.css")
     block head
   body
-    .left-nav
+    .left-nav(ng-controller="TitleController")
       ul
         a.add-note(href="#/note/0")
-          li(adder) +
+          li(adder="true") +
         - each title in titles
           a(href="#/note/#{title.id}")
-            li !{title.title}
+            li(draggable="true", data-id="#{title.id}") !{title.title}
     .main.container-fluid
       block body
     .clearfix
+    .overlay
+      .dialog-box
+        .title Trash
+        .box
+          .dropbox
+            span drop hear to delete.
   script(src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js")
   script(src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js")
   script(src="http://cdn.staticfile.org/angular.js/1.2.18/angular.min.js")

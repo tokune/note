@@ -8,11 +8,41 @@ block script
   script.
     var app = angular.module('TNote', ['ngRoute']);
     
+    app.controller('TitleController', function ($scope, noteService) {
+      $('.left-nav').on('dragstart', 'li', function(e) {
+          var overlay_el = $('.overlay')[0];
+          overlay_el.style.display = 'inline';
+          e.originalEvent.dataTransfer.setData("note_id", e.target.getAttribute('data-id'));
+      });
+      $('body').on('dragover', function(e) {
+          e.preventDefault();
+      });
+      $('body').on('drop', function() {
+          $('.overlay').css('display', 'none');
+      });
+      $('.dialog-box').on('drop', '.dropbox', function(e) {
+          var note_id = e.originalEvent.dataTransfer.getData("note_id");
+          if(!note_id) {
+            alert('Note ID not found');
+            return $('.overlay').css('display', 'none');
+          }
+          noteService.deleteNote(note_id).then(
+            function(data) {
+              var message = data.err ? data.err : 'Deleted Note ' + note_id;
+              if(!data.err) $('a[href|="#/note/' + note_id + '"]').remove();
+              if(!data.err && window.location.hash.indexOf('#/note/' + note_id) === 0) window.location.href = '#/';
+              alert(message);
+            },
+            function() {
+              alert('failed');
+            }
+          );
+      });
+    });
+
     app.controller('NoteController', function ($scope, $routeParams, noteService) {
       var note_id = ($routeParams.noteID) ? parseInt($routeParams.noteID) : 0;
       var note = {title:'', content:''};
-      var tempHTML = '';
-      var note_el = $('.note')[0];
       var Title = function() {
         this.value = note.title;
       };
@@ -30,9 +60,9 @@ block script
         noteService.getNote(note_id).then(
           function(data) {
             note = data;
-            document.note = note.content;
+            var html = data && data.content ? data.content : '';
             $scope.current_title = new Title();
-            note_el.innerHTML = note.content;
+            $('.note').html(html);
           }
         );
       }
@@ -69,6 +99,14 @@ block script
         $http.post(url, {title: title, content: content})
           .success(function(data){
             if(data.err) return alert('error');
+            if(url === '/note/') {
+              var target = $('li[current|=\'true\']');
+              if (target && target.parent() && target.parent()[0]) {
+                target.parent()[0].href = data && data.note.id ? '#/note/' + data.note.id : '#/note/0';
+                target[0].setAttribute('data-id', data.note.id);
+                window.location.href = '#/note/' + data.note.id;
+              }
+            }
             alert('saved');
           })
           .error(function(){
@@ -79,6 +117,19 @@ block script
         var deferred = $q.defer();
         var url = '/note/' + note_id;
         $http.get(url)
+          .success(function(data){
+            if(data.err) deferred.reject();
+            else deferred.resolve(data);
+          })
+          .error(function(){
+            deferred.reject(); 
+          });
+        return deferred.promise;
+      };
+      this.deleteNote = function(note_id){
+        var deferred = $q.defer();
+        var url = '/note/' + note_id + '/delete';
+        $http.post(url)
           .success(function(data){
             if(data.err) deferred.reject();
             else deferred.resolve(data);

@@ -60,6 +60,9 @@ body {
     padding: 20px;
     min-height: 400px;
 }
+.content .note * {
+    max-width: 100%;
+}
 .content .title:focus, .content .note:focus {
     outline: none;
 }
@@ -79,4 +82,44 @@ body {
     display: inline-block;
     margin-top: 15px;
 }
-
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 250px;
+    background: rgba(0,0,0,.7);
+}
+.overlay .dialog-box {
+    background: #fff;
+    width: 580px;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin: -220px 0 0 -290px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.3);
+    border-radius: 1px;
+}
+.overlay .dialog-box .title {
+    font-size: 30px;
+    height: 50px;
+    line-height: 50px;
+    padding-left: 15px;
+    border-bottom: 1px solid #444;
+}
+.overlay .dialog-box .box {
+    height: 260px;
+    padding: 25px;
+}
+.overlay .dialog-box .box .dropbox {
+    border: 2px dashed #EDEDED;
+    height: 200px;
+    text-align: center;
+}
+.overlay .dialog-box .box .dropbox span {
+    font-size: 40px;
+    color: #eee;
+    margin-top: 65px;
+    display: block;
+}
