@@ -67,6 +67,11 @@ $(function() {
     });
     $('.left-nav ul').on('click', 'li', function(e) {
         if (e.target.hasAttribute('adder')) return;
+        cleanTitleLi();
+        e.target.setAttribute('current', 'true');
+    });
+    $('.left-nav ul').on('click', 'li', function(e) {
+        if (e.target.hasAttribute('adder')) return;
         cleanTitleLi(); 
         e.target.setAttribute('current', 'true');
     });
@@ -74,6 +79,10 @@ $(function() {
         var targets = $('li[current|=\'true\']');
         targets.removeAttr('current');
     }
+    $('.main').on('click', '.box .btns .discard', function(e) {
+        var target = $('li[current|=\'true\']');
+        if (target.parent() && target.parent()[0] && target.parent()[0].hash === '#/note/0') target.parent().remove();
+    })
     paintBG(); 
 
 });
